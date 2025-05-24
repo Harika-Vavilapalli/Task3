@@ -1,15 +1,12 @@
 <?php
-$host = 'localhost';
-$dbname = 'blog';
-$username = 'root';
-$password = ''; // default is blank in XAMPP
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "blog";
 
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    // Set PDO error mode to exception
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // echo "Connected successfully"; // Optional test message
-} catch(PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+$conn = mysqli_connect($host, $user, $password, $database);
+
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
 }
 ?>

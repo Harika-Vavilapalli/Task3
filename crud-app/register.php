@@ -1,16 +1,28 @@
 <?php
 require 'config.php';
+
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
-    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-    if ($stmt->execute([$username, $password])) {
-        $message = "User registered successfully.";
+    if ($username !== '' && $password !== '') {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $query = "INSERT INTO users (username, password) VALUES (?, ?)";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "ss", $username, $hashedPassword);
+
+        if (mysqli_stmt_execute($stmt)) {
+            $message = "User registered successfully. <a href='login.php'>Login now</a>.";
+        } else {
+            $message = "Error: Username may already exist.";
+        }
+
+        mysqli_stmt_close($stmt);
     } else {
-        $message = "Registration failed.";
+        $message = "All fields are required.";
     }
 }
 ?>
@@ -19,30 +31,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Register</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
-<div class="container mt-5">
-    <div class="card mx-auto" style="max-width: 400px;">
-        <div class="card-body">
-            <h4 class="card-title text-center">Register</h4>
-            <?php if ($message): ?>
-                <div class="alert alert-info"><?php echo $message; ?></div>
-            <?php endif; ?>
-            <form method="POST">
-                <div class="form-group">
-                    <label>Username:</label>
-                    <input type="text" name="username" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Password:</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Register</button>
-                <p class="mt-3 text-center">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4 mt-5">
+            <div class="card p-4">
+                <h2 class="text-center">Register</h2>
+                <?php if ($message): ?>
+                    <div class="alert alert-info"><?= $message ?></div>
+                <?php endif; ?>
+                <form method="POST" action="">
+                    <div class="mb-3">
+                        <label>Username:</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Password:</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Register</button>
+                </form>
+                <div class="text-center mt-3">
                     Already have an account? <a href="login.php">Login here</a>
-                </p>
-            </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
